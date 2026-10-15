@@ -1,0 +1,20 @@
+# DNS Butler traceroute agent
+#
+# 1. In DNS Butler, open Traceroute Agents and register a "Service / unattended" agent.
+# 2. Put the token in a .env file next to this file:
+#      DNSBUTLER_TRACEROUTE_AGENT_TOKEN=dbta_...
+# 3. docker compose up -d
+#
+# Run one container per token. Register another service agent for each extra location.
+services:
+  traceroute-agent:
+    image: ghcr.io/mjblacker/dnsbutler-traceroute-agent:latest
+    restart: unless-stopped
+    read_only: true
+    # Raw ICMP sockets are the only privilege the agent needs.
+    cap_drop: [ALL]
+    cap_add: [NET_RAW]
+    security_opt: [no-new-privileges:true]
+    environment:
+      DNSBUTLER_TRACEROUTE_AGENT_SERVER_URL: ${DNSBUTLER_TRACEROUTE_AGENT_SERVER_URL:-https://api.dnsbutler.com}
+      DNSBUTLER_TRACEROUTE_AGENT_TOKEN: ${DNSBUTLER_TRACEROUTE_AGENT_TOKEN:?Set DNSBUTLER_TRACEROUTE_AGENT_TOKEN to your service agent token}
